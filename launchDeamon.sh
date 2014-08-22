@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DEFAULT="sshd"
-IMG_NAME="mgdemon/sshd"
+IMG_NAME="mgdemontauzan/sshd"
 
 launchNewContainer() {
 	if [ -z "$1" ]
