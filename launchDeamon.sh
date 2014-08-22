@@ -77,11 +77,16 @@ if [[ -n $(sudo docker ps | grep sshd) ]]; then
 	elif [[ $response =~ (^(reconnect|reco|r|R)$) ]]
 	then
 		echo "Reconnection to running container"
-		echo "Choose a running container to connect it :"
-		sudo docker ps 
-		echo "Name ?"
-		read name
-		connectToContainer $name
+		if [[ $(sudo docker ps | grep sshd | wc -l) -eq 1 ]]
+		then
+			connectToContainer $(sudo docker ps | grep sshd | awk '{print $1}')
+		else
+			echo "Choose a running container to connect it :"
+			sudo docker ps 
+			echo "Name ?"
+			read name
+			connectToContainer $name
+		fi
 		exit
 	elif [[ $response =~ (^(launch|l|L)$) ]]
 	then
