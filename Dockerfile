@@ -12,6 +12,9 @@ RUN mkdir /var/run/sshd && chmod 0755 /var/run/sshd/
 RUN mkdir /root/.ssh/
 ADD sshkey.pub /root/.ssh/authorized_keys
 
+#X11 Apps
+RUN apt-get install -qqy x11-apps
+
 EXPOSE 22
 
 CMD ["/usr/sbin/sshd", "-D"]

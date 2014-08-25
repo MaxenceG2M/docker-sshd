@@ -15,6 +15,8 @@ launch_new_container() {
 	if [[ -z "$1" ]]; then
 		echo "Function launch_new_container - Problem in script!" 1>2&
 		exit 1
+	else
+		echo "Function launch_new_container - Problem in script!" 1>2&
 	fi
 
 	echo ""
@@ -83,50 +85,67 @@ check_old_container() {
 	fi
 }
 
-# A container (or more) is already running
-if [[ -n $(sudo docker ps | cut -c141- | grep $CONTAINER_NAME) ]]; then
-	echo "Docker SSHD container already run."
-	read -r -p "Would you stop it and launch a new container ? Reconnect to it ?
-	 Keep it and launch another (and connect to it) ? [S/r/l/n]" response
+#===  MAIN  ====================================================================
+# Var for main
+docker_ps=$(sudo docker ps | cut -c141- | grep $CONTAINER_NAME)
+nb_container=$(echo "$docker_ps" | wc -l)
 
-	if [[ $response =~ (^(stop|s|S)$|^$) ]]; then
+# If a container is already running
+if [[ -n $docker_ps ]]; then
+	echo "Docker SSHD container already run."
+	echo "What do you want to do?"
+	echo "[R] Reconnect to this conainter"
+	echo "[s] Stop it and launch another container"
+	echo "   (if you want just stop it, run \"stopDeamon.sh\""
+	echo "[k] Keep it running and launch another container"
+	echo "[n] Do nothing."
+	read -r -p "Time to choose... [R/s/k/n] " response
+
+	if [[ $response =~ (^(stop|s|S|STOP)$) ]]; then
 		./stopDeamon.sh
-	elif [[ $response =~ (^(reconnect|reco|r|R)$) ]]; then
-		echo "Reconnection to running container"
-		if [[ $(sudo docker ps | cut -c141- | grep sshd | wc -l) -eq 1 ]]; then
-			connect_to_container $(sudo docker ps | cut -c141- | grep sshd \
-				| awk '{print $1}')
-		else
-			echo "Choose a running container to connect it :"
-			sudo docker ps
-			echo "Name ?"
-			read name
-			connect_to_container $name
-		fi
-		exit
-	elif [[ $response =~ (^(launch|l|L)$) ]]; then
-		echo "launch another container"
-		nbContainer=$(sudo docker ps | cut -c141- | grep sshd | wc -l)
-		nbContainer=$(expr $nbContainer + 1)
-		containerName=sshd-$nbContainer
-		check_old_container $containerName
-		launch_new_container $containerName
-		connect_to_container $containerName
+	elif [[ $response =~ (^(keep|k|K|KEEP)$) ]]; then
+		echo "Launch another container"
+		nb_container=$(expr $nb_container + 1)
+		container_name=sshd-$nb_container
+		check_old_container $container_name
+		launch_new_container $container_name
+		connect_to_container $container_name
+		exit 0
+	elif [[ $response =~ (^(n|no|nothing|N|NO|NOTHING)$) ]]; then
+		echo "So don't run me!"
 		exit 0
 	else
-		echo "So don't run another deamon !"
-		exit 0
+		echo ""
+		echo "Reconnection to a running container..."
+		echo ""
+		echo $docker_ps
+		echo $nb_container
+		# Check if only one container run
+		if [[ $nb_container -eq 1 ]]; then
+			connect_to_container $docker_ps
+		else
+			echo "Docker container running:"
+			echo "$docker_ps"
+			read -r -p "Choose a container: " name
+			if [[ $docker_ps =~ $name ]]; then
+				connect_to_container $name
+			else
+				echo "Container doesn't exist."
+				exit 1
+			fi
+		fi
+		exit
 	fi
 else
-	containerName=$CONTAINER_NAME # Name of the docker container
-	check_old_container $containerName # Name of the docker image to run
+	container_name=$CONTAINER_NAME # Name of the docker container
+	check_old_container $container_name # Name of the docker image to run
 	if [[ $? -eq 1 ]]; then
 		echo ""
 		echo "An old container exists - create another container"
-		nbContainer=$(sudo docker ps -a | cut -c141- | grep sshd | wc -l)
-		nbContainer=$(expr $nbContainer + 1)
-		containerName=sshd-$nbContainer
+		nb_container=$(sudo docker ps -a | cut -c141- | grep sshd | wc -l)
+		nb_container=$(expr $nb_container + 1)
+		container_name=sshd-$nb_container
 	fi
-	launch_new_container $containerName
-	connect_to_container $containerName
+	launch_new_container $container_name
+	connect_to_container $container_name
 fi
