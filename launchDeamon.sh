@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 # Written by Maxence G. de Montauzan
 
@@ -69,7 +69,7 @@ check_old_container() {
 		exit 1
 	fi
 
-	if [[ -n $(sudo docker ps -a | grep $1) ]]; then
+	if [[ -n $(sudo docker ps -a | cut -c141- | grep $1) ]]; then
 		echo "Docker container SSHD history exists."
 		read -r -p "Would you remove it ? [Y/n] " response
 		if [[ $response =~ (^(yes|y)$|^$) ]]; then
@@ -84,7 +84,7 @@ check_old_container() {
 }
 
 # A container (or more) is already running
-if [[ -n $(sudo docker ps | grep $CONTAINER_NAME) ]]; then
+if [[ -n $(sudo docker ps | cut -c141- | grep $CONTAINER_NAME) ]]; then
 	echo "Docker SSHD container already run."
 	read -r -p "Would you stop it and launch a new container ? Reconnect to it ?
 	 Keep it and launch another (and connect to it) ? [S/r/l/n]" response
@@ -93,8 +93,8 @@ if [[ -n $(sudo docker ps | grep $CONTAINER_NAME) ]]; then
 		./stopDeamon.sh
 	elif [[ $response =~ (^(reconnect|reco|r|R)$) ]]; then
 		echo "Reconnection to running container"
-		if [[ $(sudo docker ps | grep sshd | wc -l) -eq 1 ]]; then
-			connect_to_container $(sudo docker ps | grep sshd \
+		if [[ $(sudo docker ps | cut -c141- | grep sshd | wc -l) -eq 1 ]]; then
+			connect_to_container $(sudo docker ps | cut -c141- | grep sshd \
 				| awk '{print $1}')
 		else
 			echo "Choose a running container to connect it :"
@@ -106,7 +106,7 @@ if [[ -n $(sudo docker ps | grep $CONTAINER_NAME) ]]; then
 		exit
 	elif [[ $response =~ (^(launch|l|L)$) ]]; then
 		echo "launch another container"
-		nbContainer=$(sudo docker ps | grep sshd | wc -l)
+		nbContainer=$(sudo docker ps | cut -c141- | grep sshd | wc -l)
 		nbContainer=$(expr $nbContainer + 1)
 		containerName=sshd-$nbContainer
 		check_old_container $containerName
@@ -123,7 +123,7 @@ else
 	if [[ $? -eq 1 ]]; then
 		echo ""
 		echo "An old container exists - create another container"
-		nbContainer=$(sudo docker ps -a | grep sshd | wc -l)
+		nbContainer=$(sudo docker ps -a | cut -c141- | grep sshd | wc -l)
 		nbContainer=$(expr $nbContainer + 1)
 		containerName=sshd-$nbContainer
 	fi
