@@ -13,10 +13,10 @@ readonly IMG_NAME="mgdemontauzan/sshd" # Name of the docker image to run
 #===============================================================================
 launch_new_container() {
 	if [[ -z "$1" ]]; then
-		echo "Function launch_new_container - Problem in script!" 1>2&
+		echo "Function launch_new_container - Problem in script!" 1>&2
 		exit 1
 	else
-		echo "Function launch_new_container - Problem in script!" 1>2&
+		echo "Function launch_new_container - Problem in script!" 1>&2
 	fi
 
 	echo ""
@@ -30,7 +30,7 @@ launch_new_container() {
 #===============================================================================
 connect_to_container() {
 	if [[ -z "$1" ]]; then
-		echo "Function connect_to_container - Problem in script!" 1>2&
+		echo "Function connect_to_container - Problem in script!" 1>&2
 		exit 1
 	fi
 
@@ -53,9 +53,9 @@ connect_to_container() {
 
 	echo ""
 	echo "Connecting to container:"
-	echo "ssh root@$ipadress -p $port"
+	echo "ssh -X root@$ipadress -p $port"
 	echo ""
-	ssh root@$ipadress -p $port
+	ssh -X root@$ipadress -p $port
 }
 
 #===  FUNCTION  ================================================================
@@ -67,7 +67,7 @@ connect_to_container() {
 #===============================================================================
 check_old_container() {
 	if [[ -z "$1" ]]; then
-		echo "Problem Function check_old_container - in script !!!" 1>2&
+		echo "Problem Function check_old_container - in script !!!" 1>&2
 		exit 1
 	fi
 
@@ -79,7 +79,7 @@ check_old_container() {
 			sudo docker rm $1
 			return 0
 		else
-			echo "Can't launch container - Conflict case" 1>2&
+			echo "Can't launch container - Conflict case" 1>&2
 			return 1
 		fi
 	fi
@@ -87,7 +87,9 @@ check_old_container() {
 
 #===  MAIN  ====================================================================
 # Var for main
-docker_ps=$(sudo docker ps | cut -c141- | grep $CONTAINER_NAME)
+docker_ps=`sudo docker ps | cut -c141- | grep $CONTAINER_NAME`
+echo $docker_ps
+echo "testtest"
 nb_container=$(echo "$docker_ps" | wc -l)
 
 # If a container is already running
