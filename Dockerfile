@@ -9,8 +9,11 @@ RUN sed -i 's/session    required     pam_loginuid.so/session    optional     pa
 
 RUN mkdir /var/run/sshd && chmod 0755 /var/run/sshd/
 
-RUN mkdir /root/.ssh/
-ADD sshkey.pub /root/.ssh/authorized_keys
+# Conf sshd for root login
+RUN cp /etc/ssh/sshd_config /etc/ssh/sshd_config.factory-defaults && \
+	chmod a-w /etc/ssh/sshd_config.factory-defaults
+RUN sed -i 's/PermitRootLogin without-password/PermitRootLogin yes/g' /etc/ssh/sshd_config
+RUN echo 'root:root' | chpasswd
 
 EXPOSE 22
 
