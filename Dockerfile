@@ -15,6 +15,10 @@ RUN cp /etc/ssh/sshd_config /etc/ssh/sshd_config.factory-defaults && \
 RUN sed -i 's/PermitRootLogin without-password/PermitRootLogin yes/g' /etc/ssh/sshd_config
 RUN echo 'root:root' | chpasswd
 
+# Install some tools
+RUN apt-get install -qqy x11-apps
+RUN apt-get install -qqy openjdk-7-jdk
+
 EXPOSE 22
 
 CMD ["/usr/sbin/sshd", "-D"]
