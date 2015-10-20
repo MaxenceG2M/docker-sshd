@@ -5,7 +5,7 @@
 # GLOBAL VARIABLES
 # TODO Put in another files
 readonly CONTAINER_NAME="sshd" # Name of the docker container
-readonly IMG_NAME="mgdemontauzan/sshd" # Name of the docker image to run
+readonly IMG_NAME="mgdemontauzan/ssh" # Name of the docker image to run
 
 #===  FUNCTION  ================================================================
 # Launch a new docker container with a name.
